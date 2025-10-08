@@ -10,11 +10,11 @@ mod _banquo_impl {
     use pyo3::{FromPyObject, IntoPyObject};
 
     use super::metric::PyMetric;
-    use banquo_core::operators::{
+    use banquo::operators::{
         Always, And, BinaryOperatorError, Eventually, ForwardOperatorError, Implies, Next, Not, Or,
     };
-    use banquo_core::predicate::Predicate;
-    use banquo_core::{Formula, Trace};
+    use banquo::predicate::Predicate;
+    use banquo::{Formula, Trace};
 
     #[pyclass(name = "Trace", subclass, generic)]
     struct PyTrace(Trace<Py<PyAny>>);
@@ -32,7 +32,12 @@ mod _banquo_impl {
             // If we construct a pytrace from a pytrace, we can copy without converting to python objects
             if let Ok(pytrace) = elements.cast::<PyTrace>() {
                 let py = elements.py();
-                let copied = pytrace.borrow().0.iter().map_states(|obj| obj.clone_ref(py)).collect();
+                let copied = pytrace
+                    .borrow()
+                    .0
+                    .iter()
+                    .map_states(|obj| obj.clone_ref(py))
+                    .collect();
                 return Ok(PyTrace(copied));
             }
 
@@ -45,8 +50,9 @@ mod _banquo_impl {
         }
 
         fn __getitem__(&self, py: Python<'_>, time: f64) -> PyResult<Py<PyAny>> {
-            self.at_time(py, time)
-                .ok_or_else(|| PyKeyError::new_err(format!("Time {} is not present in trace", time)))
+            self.at_time(py, time).ok_or_else(|| {
+                PyKeyError::new_err(format!("Time {} is not present in trace", time))
+            })
         }
 
         fn times(&self) -> Vec<f64> {
@@ -96,12 +102,18 @@ mod _banquo_impl {
     }
 
     impl PyPredicate {
-        fn evaluate_inner(&self, py: Python<'_>, trace: &Trace<Py<PyAny>>) -> PyResult<Trace<PyMetric>> {
+        fn evaluate_inner(
+            &self,
+            py: Python<'_>,
+            trace: &Trace<Py<PyAny>>,
+        ) -> PyResult<Trace<PyMetric>> {
             let converted = trace
                 .iter()
                 .map(|(time, state)| state.extract::<HashMap<String, f64>>(py).map(|s| (time, s)))
                 .collect::<PyResult<Trace<_>>>()
-                .map_err(|_| PyValueError::new_err("Predicate only supports dict values as trace states."))?;
+                .map_err(|_| {
+                    PyValueError::new_err("Predicate only supports dict values as trace states.")
+                })?;
 
             let evaluated = self
                 .0
@@ -130,7 +142,8 @@ mod _banquo_impl {
         }
 
         pub fn evaluate(&self, trace: &Bound<'_, PyTrace>) -> PyResult<PyMetricTrace> {
-            self.evaluate_inner(trace.py(), &trace.borrow().0).map(PyMetricTrace)
+            self.evaluate_inner(trace.py(), &trace.borrow().0)
+                .map(PyMetricTrace)
         }
     }
 
@@ -217,7 +230,9 @@ mod _banquo_impl {
             self.0.evaluate(trace).map_err(|err| match err {
                 BinaryOperatorError::LeftError(left) => left,
                 BinaryOperatorError::RightError(right) => right,
-                BinaryOperatorError::EvaluationError(err) => PyRuntimeError::new_err(err.to_string()),
+                BinaryOperatorError::EvaluationError(err) => {
+                    PyRuntimeError::new_err(err.to_string())
+                }
             })
         }
     }
@@ -242,7 +257,9 @@ mod _banquo_impl {
             self.0.evaluate(trace).map_err(|err| match err {
                 BinaryOperatorError::LeftError(left) => left,
                 BinaryOperatorError::RightError(right) => right,
-                BinaryOperatorError::EvaluationError(err) => PyRuntimeError::new_err(err.to_string()),
+                BinaryOperatorError::EvaluationError(err) => {
+                    PyRuntimeError::new_err(err.to_string())
+                }
             })
         }
     }
@@ -267,7 +284,9 @@ mod _banquo_impl {
             self.0.evaluate(trace).map_err(|err| match err {
                 BinaryOperatorError::LeftError(left) => left,
                 BinaryOperatorError::RightError(right) => right,
-                BinaryOperatorError::EvaluationError(err) => PyRuntimeError::new_err(err.to_string()),
+                BinaryOperatorError::EvaluationError(err) => {
+                    PyRuntimeError::new_err(err.to_string())
+                }
             })
         }
     }
@@ -311,7 +330,9 @@ mod _banquo_impl {
     impl PyAlways {
         fn evaluate_inner(&self, trace: &Trace<Py<PyAny>>) -> PyResult<Trace<PyMetric>> {
             self.0.evaluate(trace).map_err(|err| match err {
-                ForwardOperatorError::EmptyInterval => PyValueError::new_err("Bounds interval must not be empty."),
+                ForwardOperatorError::EmptyInterval => {
+                    PyValueError::new_err("Bounds interval must not be empty.")
+                }
                 ForwardOperatorError::EmptySubtraceEvaluation(t) => {
                     PyRuntimeError::new_err(format!("Subtrace at time {} is empty.", t))
                 }
@@ -344,7 +365,9 @@ mod _banquo_impl {
     impl PyEventually {
         fn evaluate_inner(&self, trace: &Trace<Py<PyAny>>) -> PyResult<Trace<PyMetric>> {
             self.0.evaluate(trace).map_err(|err| match err {
-                ForwardOperatorError::EmptyInterval => PyValueError::new_err("Bounds interval must not be empty."),
+                ForwardOperatorError::EmptyInterval => {
+                    PyValueError::new_err("Bounds interval must not be empty.")
+                }
                 ForwardOperatorError::EmptySubtraceEvaluation(t) => {
                     PyRuntimeError::new_err(format!("Subtrace at time {} is empty.", t))
                 }

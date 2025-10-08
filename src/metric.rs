@@ -5,7 +5,7 @@ use pyo3::basic::CompareOp;
 use pyo3::types::{PyAny, PyAnyMethods, PyBool, PyNotImplemented};
 use pyo3::{Bound, IntoPyObject, IntoPyObjectExt, Py, PyResult, Python, pyclass, pymethods};
 
-use banquo_core::{Bottom, Join, Meet, Top};
+use banquo::{Bottom, Join, Meet, Top};
 
 // This class is a special value that represents the maximum of ALL python values.
 // Thus, this the greater-than implementation for this class will always return true.
@@ -116,7 +116,11 @@ impl PartialOrd for PyMetric {
 }
 
 fn pymeet<'py>(lhs: &Bound<'py, PyAny>, rhs: &Bound<'py, PyAny>) -> Bound<'py, PyAny> {
-    if lhs.le(rhs).unwrap() { lhs.clone() } else { rhs.clone() }
+    if lhs.le(rhs).unwrap() {
+        lhs.clone()
+    } else {
+        rhs.clone()
+    }
 }
 
 // Required for operator implementations (And, Iff, etc.)
@@ -127,7 +131,11 @@ impl Meet for PyMetric {
 }
 
 fn pyjoin<'py>(lhs: &Bound<'py, PyAny>, rhs: &Bound<'py, PyAny>) -> Bound<'py, PyAny> {
-    if lhs.ge(rhs).unwrap() { lhs.clone() } else { rhs.clone() }
+    if lhs.ge(rhs).unwrap() {
+        lhs.clone()
+    } else {
+        rhs.clone()
+    }
 }
 
 // Required for operator implementations (Or, Implies, etc.)
