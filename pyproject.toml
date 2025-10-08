@@ -27,7 +27,9 @@ module-name = "banquo._banquo_impl"
 features = ["pyo3/extension-module"]
 
 [tool.ruff]
+preview = true
 line-length = 100
+target-version = "py39"
 
 [tool.pyright]
 include = ["banquo"]
