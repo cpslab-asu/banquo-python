@@ -17,7 +17,7 @@ dependencies = [
 
 [dependency-groups]
 ci = [
-    "mypy>=1.18.2",
+    "basedpyright>=1.31.6",
 ]
 dev = [
     "maturin>=1.9.4",
