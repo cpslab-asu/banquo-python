@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/ruff-action@v3
         with:
-          args: format --preview --check --output-format=github
+          args: format --check --output-format=github
       - uses: astral-sh/ruff-action@v3
         with:
-          args: check --preview --output-format=github
+          args: check --output-format=github
