@@ -1,0 +1,29 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+
+    name: Python ${{ matrix.python-version }} Unit Tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          working-directory: banquo-python
+      - name: Unit tests
+        run: uv run --directory banquo-python --frozen pytest -v -m unit
+      - name: Conformance tests
+        run: uv run --directory banquo-python --frozen pytest -v -m conformance
