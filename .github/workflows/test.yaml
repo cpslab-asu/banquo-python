@@ -22,7 +22,6 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ matrix.python-version }}
-          working-directory: banquo-python
       - name: Unit tests
         run: uv run --frozen pytest -v -m unit
       - name: Conformance tests
