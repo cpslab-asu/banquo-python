@@ -3,7 +3,7 @@
 #
 #    maturin generate-ci github --platform manylinux musllinux macos windows
 #
-name: CI
+name: Release
 
 on:
   push:
@@ -16,7 +16,14 @@ permissions:
   contents: read
 
 jobs:
+  lint:
+    uses: ./.github/workflows/lint.yaml
+
+  test:
+    uses: ./.github/workflows/test.yaml
+
   linux:
+    needs: [lint, test]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -52,6 +59,7 @@ jobs:
           path: dist
 
   musllinux:
+    needs: [lint, test]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -83,6 +91,7 @@ jobs:
           path: dist
 
   windows:
+    needs: [lint, test]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -110,6 +119,7 @@ jobs:
           path: dist
 
   macos:
+    needs: [lint, test]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -136,6 +146,7 @@ jobs:
           path: dist
 
   sdist:
+    needs: [lint, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
