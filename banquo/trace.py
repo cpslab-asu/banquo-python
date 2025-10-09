@@ -38,7 +38,7 @@ class Trace(_Trace[T], Iterable[tuple[float, T]]):
 
     @override
     def __iter__(self) -> Iterator[tuple[float, T]]:
-        return zip(self.times(), self.states())
+        return zip(super().times(), super().states())
 
     @override
     def __eq__(self, other: object) -> bool:
@@ -47,8 +47,33 @@ class Trace(_Trace[T], Iterable[tuple[float, T]]):
 
         return _iter_eq(self.times(), other.times()) and _iter_eq(self.states(), other.states())
 
+    @override
+    def times(self) -> Iterable[float]:
+        """Iterator over the times of the trace."""
+
+        return iter(super().times())
+
+    @override
+    def states(self) -> Iterable[T]:
+        """Iterator over the states of the trace."""
+
+        return iter(super().states())
+
     @staticmethod
     def from_timed_states(times: Iterable[float], states: Iterable[U]) -> Trace[U]:
+        """Construct a trace from a set of times and a set of states.
+
+        Args:
+            times: The times of the trace
+            states: The state for each time
+
+        Returns:
+            A `Trace` instance from the times and states
+
+        Raises:
+            MismatchedTimesStates: If the number of time values does not match the number of state values.
+        """
+
         times_ = list(times)
         states_ = list(states)
 
