@@ -5,6 +5,12 @@ build-backend = "maturin"
 [project]
 name = "pybanquo"
 version = "0.1.0"
+description = "Python bindings for Banquo offline temporal logic monitor"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name="Quinn Thibeault", email="qthibeau@asu.edu"},
+]
 requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Rust",
@@ -15,10 +21,12 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dynamic = ["version"]
 dependencies = [
     "typing-extensions>=4.13.2",
 ]
+
+[project.urls]
+repository = "https://github.com/cpslab-asu/banquo-python"
 
 [dependency-groups]
 ci = [
