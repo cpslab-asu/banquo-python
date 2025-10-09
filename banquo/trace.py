@@ -21,6 +21,14 @@ class MismatchedTimesStates(Exception):
 
 
 class Trace(_Trace[T], Iterable[tuple[float, T]]):
+    """A set of values and their associated times.
+
+    Iterating over a trace yields (time, value) pairs.
+
+    Args:
+        elements: The set of times and their associated values
+    """
+
     def __new__(cls, elements: Mapping[float, T] | _Trace[T]):
         return super().__new__(cls, elements if isinstance(elements, _Trace) else dict(elements))
 
