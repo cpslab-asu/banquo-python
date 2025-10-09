@@ -3,7 +3,7 @@ requires = ["maturin>=1.9,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "banquo"
+name = "pybanquo"
 requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Rust",
@@ -32,6 +32,7 @@ dev = [
 [tool.maturin]
 module-name = "banquo._banquo_impl"
 features = ["pyo3/extension-module"]
+python-packages = ["banquo"]
 
 [tool.ruff]
 preview = true
