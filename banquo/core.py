@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Protocol, TypeVar
 
 from typing_extensions import Self, override
@@ -100,3 +101,18 @@ def evaluate(formula: Formula[S, M], trace: Trace[S]) -> M:
         return next(iter(result.states()))
     except StopIteration:
         raise ValueError("Provided formula evaluated to an empty trace.")
+
+
+class UserFormula(Formula[S, M]):
+    def __init__(self, func: Callable[[Trace[S]], Trace[M]]):
+        self.func: Callable[[Trace[S]], Trace[M]] = func
+
+    @override
+    def evaluate(self, trace: Trace[S]) -> Trace[M]:
+        return self.func(trace)
+
+
+def formula(f: Callable[[Trace[S]], Trace[M]]) -> Formula[S, M]:
+    """Transform a function into a Formula implementation."""
+
+    return UserFormula(f)
