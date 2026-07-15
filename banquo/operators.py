@@ -133,7 +133,7 @@ class Next(Operator[S, M]):
     """
 
     def __init__(self, subformula: Formula[S, M]):
-        super().__init__(_Next(subformula), "")
+        super().__init__(_Next(_inner_or_wrap(subformula)), "")
 
 
 S_ = typing.TypeVar("S_")
