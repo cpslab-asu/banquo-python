@@ -6,7 +6,7 @@ from typing import TypeVar
 import pytest
 import typing_extensions
 
-from banquo import Bottom, Trace, operators
+from banquo import Bottom, Trace, operators, formula
 from banquo.core import Formula
 
 pytestmark = pytest.mark.unit
@@ -322,3 +322,28 @@ class TestFinally(UnaryTest):
 
         with pytest.raises(operators.MetricAttributeError):
             _ = formula.evaluate(bad_trace)  # pyright: ignore[reportUnknownVariableType]
+
+
+@formula
+def neg(input: Trace[float]) -> Trace[float]:
+    assert isinstance(input, Trace)  # Ensure the input trace is correctly wrapped
+    return Trace.from_timed_states(input.times(), (-state for state in input.states()))
+
+
+class TestCustomOperator(UnaryTest):
+    @pytest.fixture
+    def expected(self, input: Trace[float]) -> Trace[float]:
+        return Trace({time: -state for time, state in input})
+
+    def test_evaluate(self, input: Trace[float], expected: Trace[float]):
+        result = neg.evaluate(input)
+
+        assert isinstance(result, Trace)
+        assert result == expected
+
+    def test_nesting(self, input: Trace[float], expected: Trace[float]):
+        formula = operators.And(neg, Const())
+        result = formula.evaluate(input)
+
+        assert isinstance(result, Trace)
+        assert result == expected
