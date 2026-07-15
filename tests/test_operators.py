@@ -49,6 +49,7 @@ class GoodMetric(BadMetric):
 class Const(Formula[T, T]):
     @typing_extensions.override
     def evaluate(self, trace: Trace[T]) -> Trace[T]:
+        assert isinstance(trace, Trace)
         return trace
 
 
@@ -110,6 +111,7 @@ class Left(Formula[tuple[L, R], L]):
 class Right(Formula[tuple[L, R], R]):
     @typing_extensions.override
     def evaluate(self, trace: Trace[tuple[L, R]]) -> Trace[R]:
+        assert isinstance(trace, Trace)
         return Trace({time: state[1] for time, state in trace})
 
 
