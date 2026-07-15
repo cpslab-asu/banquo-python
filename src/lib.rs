@@ -11,7 +11,8 @@ mod _banquo_impl {
 
     use super::metric::PyMetric;
     use banquo::operators::{
-        Always, And, BinaryOperatorError, Eventually, ForwardOperatorError, Implies, Next, Not, Or,
+        Always, And, BinaryOperatorError, Eventually, ForwardEvaluationError, ForwardOperatorError,
+        Implies, Next, Not, Or,
     };
     use banquo::predicate::Predicate;
     use banquo::{Formula, Trace};
@@ -330,12 +331,14 @@ mod _banquo_impl {
     impl PyAlways {
         fn evaluate_inner(&self, trace: &Trace<Py<PyAny>>) -> PyResult<Trace<PyMetric>> {
             self.0.evaluate(trace).map_err(|err| match err {
-                ForwardOperatorError::EmptyInterval => {
-                    PyValueError::new_err("Bounds interval must not be empty.")
-                }
-                ForwardOperatorError::EmptySubtraceEvaluation(t) => {
-                    PyRuntimeError::new_err(format!("Subtrace at time {} is empty.", t))
-                }
+                ForwardOperatorError::EvaluationError(eval_err) => match eval_err {
+                    ForwardEvaluationError::EmptyInterval => {
+                        PyValueError::new_err("Bounds interval must not be empty.")
+                    }
+                    ForwardEvaluationError::EmptySubtraceEvaluation(t) => {
+                        PyRuntimeError::new_err(format!("Subtrace at time {} is empty.", t))
+                    }
+                },
                 ForwardOperatorError::FormulaError(err) => err,
             })
         }
@@ -365,12 +368,14 @@ mod _banquo_impl {
     impl PyEventually {
         fn evaluate_inner(&self, trace: &Trace<Py<PyAny>>) -> PyResult<Trace<PyMetric>> {
             self.0.evaluate(trace).map_err(|err| match err {
-                ForwardOperatorError::EmptyInterval => {
-                    PyValueError::new_err("Bounds interval must not be empty.")
-                }
-                ForwardOperatorError::EmptySubtraceEvaluation(t) => {
-                    PyRuntimeError::new_err(format!("Subtrace at time {} is empty.", t))
-                }
+                ForwardOperatorError::EvaluationError(eval_err) => match eval_err {
+                    ForwardEvaluationError::EmptyInterval => {
+                        PyValueError::new_err("Bounds interval must not be empty.")
+                    }
+                    ForwardEvaluationError::EmptySubtraceEvaluation(t) => {
+                        PyRuntimeError::new_err(format!("Subtrace at time {} is empty.", t))
+                    }
+                },
                 ForwardOperatorError::FormulaError(err) => err,
             })
         }
