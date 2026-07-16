@@ -1,5 +1,6 @@
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from typing import Any, Generic, TypeVar
+from types import ModuleType
 
 from typing_extensions import Self, override
 
@@ -74,3 +75,11 @@ class Eventually(Formula[S, M_ge]):
     def __new__(cls, bounds: Bounds | None, subformula: Formula[S, M_ge]) -> Self: ...
     @override
     def evaluate(self, trace: Trace[S]) -> Trace[M_ge]: ...
+
+class _StlModule(ModuleType):
+    class Formula(Formula[dict[str, float], float]):
+        ...
+
+    parse: Callable[[str], _StlModule.Formula]
+
+stl: _StlModule
