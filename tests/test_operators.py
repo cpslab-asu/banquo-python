@@ -33,17 +33,17 @@ class GoodMetric(BadMetric):
     def __neg__(self) -> GoodMetric:
         return GoodMetric(-self.value)
 
-    def __le__(self, other: object, /) -> bool:
+    def __lt__(self, other: object, /) -> bool:
         if not isinstance(other, GoodMetric):
             return NotImplemented
 
-        return self.value <= other.value
+        return self.value < other.value
 
-    def __ge__(self, other: object, /) -> bool:
+    def __gt__(self, other: object, /) -> bool:
         if not isinstance(other, GoodMetric):
             return NotImplemented
 
-        return self.value >= other.value
+        return self.value > other.value
 
 
 class Const(Formula[T, T]):

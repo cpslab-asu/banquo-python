@@ -11,13 +11,12 @@ from ._banquo_impl import Implies as _Implies
 from ._banquo_impl import Next as _Next
 from ._banquo_impl import Not as _Not
 from ._banquo_impl import Or as _Or
-from ._banquo_impl import PanicException
 from .core import (
     Formula,
     EnsureInput,
     SupportsNeg,
-    SupportsLE,
-    SupportsGE,
+    SupportsLT,
+    SupportsGT,
     EnsureOutput,
     SupportsNegGE,
 )
@@ -28,8 +27,8 @@ Bounds: TypeAlias = tuple[float, float]
 S = typing.TypeVar("S")
 M = typing.TypeVar("M", covariant=True)
 M_neg = typing.TypeVar("M_neg", bound=SupportsNeg, covariant=True)
-M_le = typing.TypeVar("M_le", bound=SupportsLE, covariant=True)
-M_ge = typing.TypeVar("M_ge", bound=SupportsGE, covariant=True)
+M_le = typing.TypeVar("M_le", bound=SupportsLT, covariant=True)
+M_ge = typing.TypeVar("M_ge", bound=SupportsGT, covariant=True)
 M_neg_ge = typing.TypeVar("M_neg_ge", bound=SupportsNegGE, covariant=True)
 
 
@@ -39,8 +38,7 @@ class OperatorMixin:
 
 
 class MetricAttributeError(AttributeError):
-    def __init__(self, missing_method: str):
-        super().__init__(f"Metric must implement {missing_method} method")
+    pass
 
 
 class Operator(EnsureOutput[S, M], OperatorMixin):
@@ -52,8 +50,8 @@ class Operator(EnsureOutput[S, M], OperatorMixin):
     def evaluate(self, trace: Trace[S]) -> Trace[M]:
         try:
             return super().evaluate(trace)
-        except PanicException as e:
-            raise MetricAttributeError(self.required_method) from e
+        except TypeError as e:
+            raise MetricAttributeError() from e
 
 
 def _inner_or_wrap(formula: Formula[S, M]) -> Formula[S, M]:
@@ -137,7 +135,7 @@ class Next(Operator[S, M]):
 
 
 S_ = typing.TypeVar("S_")
-M_le_ = typing.TypeVar("M_le_", bound=SupportsLE, covariant=True)
+M_le_ = typing.TypeVar("M_le_", bound=SupportsLT, covariant=True)
 
 
 class Always(Operator[S, M_le]):
@@ -177,7 +175,7 @@ class Always(Operator[S, M_le]):
         return Always(_Always(bounds, _inner_or_wrap(subformula)))
 
 
-M_ge_ = typing.TypeVar("M_ge_", bound=SupportsGE, covariant=True)
+M_ge_ = typing.TypeVar("M_ge_", bound=SupportsGT, covariant=True)
 
 
 class Eventually(Operator[S, M_ge]):
