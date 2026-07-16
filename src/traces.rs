@@ -14,9 +14,11 @@ impl From<Trace<Py<PyAny>>> for PyTrace {
     }
 }
 
-impl<'py> FromPyObject<'py> for PyTrace {
-    fn extract_bound(obj: &Bound<'py, PyAny>) -> PyResult<Self> {
-        Self::new(obj)
+impl<'py> FromPyObject<'_, 'py> for PyTrace {
+    type Error = PyErr;
+
+    fn extract(obj: Borrowed<'_, 'py, PyAny>) -> Result<Self, Self::Error> {
+        Self::new(obj.as_any())
     }
 }
 

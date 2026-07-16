@@ -59,13 +59,8 @@ impl PyPredicate {
     }
 }
 
+#[derive(FromPyObject)]
 struct PyFormula(Py<PyAny>);
-
-impl<'py> FromPyObject<'py> for PyFormula {
-    fn extract_bound(obj: &Bound<'py, PyAny>) -> PyResult<Self> {
-        Ok(Self(obj.clone().unbind()))
-    }
-}
 
 fn evaluate(obj: &Bound<'_, PyAny>, trace: &Trace<Py<PyAny>>) -> PyResult<Trace<PyMetric>> {
     if let Ok(pred) = obj.cast::<PyPredicate>() {
