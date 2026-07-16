@@ -1,8 +1,9 @@
 use std::cmp::Ordering;
 use std::ops::Neg;
 
+use pyo3::PyErr;
 use pyo3::basic::CompareOp;
-use pyo3::types::{PyAny, PyAnyMethods, PyBool, PyNotImplemented};
+use pyo3::types::{PyAny, PyAnyMethods, PyBool, PyModule, PyNotImplemented};
 use pyo3::{Bound, IntoPyObject, IntoPyObjectExt, Py, PyResult, Python, pyclass, pymethods};
 
 use banquo::{Bottom, Join, Meet, Top};
@@ -65,38 +66,62 @@ impl PyBottom {
     }
 }
 
-#[derive(IntoPyObject)]
-pub struct PyMetric(Py<PyAny>);
+type PyMetricInner = PyResult<Py<PyAny>>;
+
+pub struct PyMetric(PyMetricInner);
 
 impl PyMetric {
-    pub fn try_from_f64(value: f64, py: Python<'_>) -> PyResult<Self> {
-        value.into_py_any(py).map(Self)
+    pub fn from_f64(value: f64) -> Self {
+        Self(Python::attach(|py| value.into_py_any(py)))
+    }
+
+    pub fn into_inner(self) -> PyMetricInner {
+        self.0
     }
 }
 
 impl From<Py<PyAny>> for PyMetric {
     fn from(value: Py<PyAny>) -> Self {
-        Self(value)
+        Self(Ok(value))
     }
 }
 
-impl From<Bound<'_, PyAny>> for PyMetric {
-    fn from(value: Bound<'_, PyAny>) -> Self {
-        Self(value.unbind())
+impl<'py> IntoPyObject<'py> for PyMetric {
+    type Target = PyAny;
+    type Output = Bound<'py, Self::Target>;
+    type Error = PyErr;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
+        self.0.map(|value| value.into_bound(py))
     }
 }
 
-impl Into<Py<PyAny>> for PyMetric {
-    fn into(self) -> Py<PyAny> {
-        self.0
-    }
+fn transpose_results<A, B, E>(lhs: Result<A, E>, rhs: Result<B, E>) -> Result<(A, B), E> {
+    Ok((lhs?, rhs?))
 }
 
-// Required for PartialOrd implementation
 impl PartialEq for PyMetric {
     fn eq(&self, other: &Self) -> bool {
-        // If equality is not defined, then the two objects are never equal
-        Python::attach(|py| self.0.bind(py).eq(&other.0).unwrap())
+        // Two metrics are equal if their inner values are equal and not errors
+        Python::attach(|py| -> bool {
+            transpose_results(self.0.as_ref(), other.0.as_ref())
+                .map_err(|e| e.clone_ref(py))
+                .and_then(|(lhs, rhs)| lhs.bind(py).eq(rhs))
+                .unwrap_or(false)
+        })
+    }
+}
+
+impl PartialOrd for PyMetric {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        // Create an ordering for the two metrics only if both are not errors
+        // If the compare method creates an error, transform it to a None value
+        Python::attach(|py| -> Option<Ordering> {
+            transpose_results(self.0.as_ref(), other.0.as_ref())
+                .map_err(|e| e.clone_ref(py))
+                .and_then(|(lhs, rhs)| lhs.bind(py).compare(rhs))
+                .ok()
+        })
     }
 }
 
@@ -104,55 +129,46 @@ impl Neg for PyMetric {
     type Output = Self;
 
     fn neg(self) -> Self::Output {
-        Python::attach(|py| self.0.bind(py).neg().map(Self::from).unwrap())
+        let negated = Python::attach(|py| {
+            self.0
+                .and_then(|value| value.bind(py).neg())
+                .map(|value| value.unbind())
+        });
+
+        Self(negated)
     }
 }
 
-// Required for Meet implementation
-impl PartialOrd for PyMetric {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Python::attach(|py| Some(self.0.bind(py).compare(&other.0).unwrap()))
-    }
+fn builtin(py: Python<'_>, lhs: &PyMetricInner, rhs: &PyMetricInner, name: &str) -> PyMetricInner {
+    let (lval, rval) =
+        transpose_results(lhs.as_ref(), rhs.as_ref()).map_err(|e| e.clone_ref(py))?;
+
+    PyModule::import(py, "builtins")?
+        .getattr(name)?
+        .call((lval, rval), None)
+        .map(|value| value.unbind())
 }
 
-fn pymeet<'py>(lhs: &Bound<'py, PyAny>, rhs: &Bound<'py, PyAny>) -> Bound<'py, PyAny> {
-    if lhs.le(rhs).unwrap() {
-        lhs.clone()
-    } else {
-        rhs.clone()
-    }
-}
-
-// Required for operator implementations (And, Iff, etc.)
 impl Meet for PyMetric {
     fn min(&self, other: &Self) -> Self {
-        Python::attach(|py| pymeet(self.0.bind(py), other.0.bind(py)).into())
+        Self(Python::attach(|py| builtin(py, &self.0, &other.0, "min")))
     }
 }
 
-fn pyjoin<'py>(lhs: &Bound<'py, PyAny>, rhs: &Bound<'py, PyAny>) -> Bound<'py, PyAny> {
-    if lhs.ge(rhs).unwrap() {
-        lhs.clone()
-    } else {
-        rhs.clone()
-    }
-}
-
-// Required for operator implementations (Or, Implies, etc.)
 impl Join for PyMetric {
     fn max(&self, other: &Self) -> Self {
-        Python::attach(|py| pyjoin(self.0.bind(py), other.0.bind(py)).into())
+        Self(Python::attach(|py| builtin(py, &self.0, &other.0, "max")))
     }
 }
 
 impl Top for PyMetric {
     fn top() -> Self {
-        Python::attach(|py| PyMetric(PyTop.into_py_any(py).unwrap()))
+        Python::attach(|py| Self(PyTop.into_py_any(py)))
     }
 }
 
 impl Bottom for PyMetric {
     fn bottom() -> Self {
-        Python::attach(|py| PyMetric(PyBottom.into_py_any(py).unwrap()))
+        Python::attach(|py| Self(PyBottom.into_py_any(py)))
     }
 }
