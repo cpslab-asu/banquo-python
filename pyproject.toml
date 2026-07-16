@@ -48,10 +48,6 @@ preview = true
 line-length = 100
 target-version = "py39"
 
-[tool.pyright]
-include = ["banquo"]
-pythonVersion = "3.9"
-
 [tool.pytest.ini_options]
 testpaths = [
     "tests"
@@ -59,4 +55,12 @@ testpaths = [
 markers = [
     "conformance: Tests to verify correct behavior of formulas",
     "unit: Tests to verify correct behavior of operators",
+]
+
+[tool.pyrefly]
+preset = "default"
+python-version = "3.9"
+project-includes = [
+    "banquo",
+    "tests",
 ]
