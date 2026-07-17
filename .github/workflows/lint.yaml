@@ -28,11 +28,11 @@ jobs:
         with:
           args: check --output-format=github
 
-  basedpyright:
+  pyrefly:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - run: uv run --no-dev --group ci basedpyright --outputjson
+      - run: uv run --no-dev --group types pyrefly check --output-format=github

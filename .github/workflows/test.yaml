@@ -24,6 +24,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Unit tests
-        run: uv run --frozen pytest -v -m unit
+        run: uv run --frozen --no-dev --group test pytest -v -m unit
       - name: Conformance tests
-        run: uv run --frozen pytest -v -m conformance
+        run: uv run --frozen --no-dev --group test pytest -v -m conformance
