@@ -33,9 +33,18 @@ ci = [
     "basedpyright>=1.31.6",
 ]
 dev = [
-    "maturin>=1.9.4",
-    "pytest>=8.3.5",
-    "ruff>=0.14.0",
+    "maturin>=1.9.4,<2.0",
+    "ruff>=0.15.0",
+    { include-group = "test" },
+    { include-group = "types" },
+]
+test = [
+    "pytest>=8.4.2",
+]
+types = [
+    "pyrefly>=1.1.1",
+    # We include the test group here to make pytest available when type checking test modules
+    { include-group = "test" },
 ]
 
 [tool.maturin]
@@ -48,10 +57,6 @@ preview = true
 line-length = 100
 target-version = "py39"
 
-[tool.pyright]
-include = ["banquo"]
-pythonVersion = "3.9"
-
 [tool.pytest.ini_options]
 testpaths = [
     "tests"
@@ -59,4 +64,12 @@ testpaths = [
 markers = [
     "conformance: Tests to verify correct behavior of formulas",
     "unit: Tests to verify correct behavior of operators",
+]
+
+[tool.pyrefly]
+preset = "default"
+python-version = "3.9"
+project-includes = [
+    "banquo",
+    "tests",
 ]

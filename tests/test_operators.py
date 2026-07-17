@@ -6,7 +6,7 @@ from typing import TypeVar
 import pytest
 import typing_extensions
 
-from banquo import Bottom, Trace, operators
+from banquo import Bottom, Trace, formula, operators
 from banquo.core import Formula
 
 pytestmark = pytest.mark.unit
@@ -33,22 +33,23 @@ class GoodMetric(BadMetric):
     def __neg__(self) -> GoodMetric:
         return GoodMetric(-self.value)
 
-    def __le__(self, other: object, /) -> bool:
+    def __lt__(self, other: object, /) -> bool:
         if not isinstance(other, GoodMetric):
             return NotImplemented
 
-        return self.value <= other.value
+        return self.value < other.value
 
-    def __ge__(self, other: object, /) -> bool:
+    def __gt__(self, other: object, /) -> bool:
         if not isinstance(other, GoodMetric):
             return NotImplemented
 
-        return self.value >= other.value
+        return self.value > other.value
 
 
 class Const(Formula[T, T]):
     @typing_extensions.override
     def evaluate(self, trace: Trace[T]) -> Trace[T]:
+        assert isinstance(trace, Trace)
         return trace
 
 
@@ -90,10 +91,10 @@ class TestNegation(UnaryTest):
         assert formula.evaluate(good_trace) == expected
 
     def test_unsupported_metric(self, bad_trace: Trace[BadMetric]):
-        formula = operators.Not(Const[BadMetric]())  # pyright: ignore[reportArgumentType, reportUnknownVariableType]
+        formula = operators.Not(Const[BadMetric]())  # pyrefly: ignore[bad-specialization]
 
         with pytest.raises(operators.MetricAttributeError):
-            _ = formula.evaluate(bad_trace)  # pyright: ignore[reportUnknownVariableType]
+            _ = formula.evaluate(bad_trace)
 
 
 L = TypeVar("L")
@@ -110,6 +111,7 @@ class Left(Formula[tuple[L, R], L]):
 class Right(Formula[tuple[L, R], R]):
     @typing_extensions.override
     def evaluate(self, trace: Trace[tuple[L, R]]) -> Trace[R]:
+        assert isinstance(trace, Trace)
         return Trace({time: state[1] for time, state in trace})
 
 
@@ -151,10 +153,12 @@ class TestConjunction(BinaryTest):
         assert formula.evaluate(good_trace) == expected
 
     def test_unsupported_metric(self, bad_trace: Trace[tuple[BadMetric, BadMetric]]):
-        formula = operators.And(Left[BadMetric, BadMetric](), Right[BadMetric, BadMetric]())  # pyright: ignore[reportArgumentType, reportUnknownVariableType]
+        formula = operators.And(  # pyrefly: ignore[bad-specialization]
+            Left[BadMetric, BadMetric](), Right[BadMetric, BadMetric]()
+        )
 
         with pytest.raises(operators.MetricAttributeError):
-            _ = formula.evaluate(bad_trace)  # pyright: ignore[reportUnknownVariableType]
+            _ = formula.evaluate(bad_trace)
 
 
 class TestDisjunction(BinaryTest):
@@ -176,10 +180,12 @@ class TestDisjunction(BinaryTest):
         assert formula.evaluate(good_trace) == expected
 
     def test_unsupported_metric(self, bad_trace: Trace[tuple[BadMetric, BadMetric]]):
-        formula = operators.Or(Left[BadMetric, BadMetric](), Right[BadMetric, BadMetric]())  # pyright: ignore[reportArgumentType, reportUnknownVariableType]
+        formula = operators.Or(  # pyrefly: ignore[bad-specialization]
+            Left[BadMetric, BadMetric](), Right[BadMetric, BadMetric]()
+        )
 
         with pytest.raises(operators.MetricAttributeError):
-            _ = formula.evaluate(bad_trace)  # pyright: ignore[reportUnknownVariableType]
+            _ = formula.evaluate(bad_trace)
 
 
 class TestImplication(BinaryTest):
@@ -202,10 +208,12 @@ class TestImplication(BinaryTest):
         assert result == expected
 
     def test_unsupported_metric(self, bad_trace: Trace[tuple[BadMetric, BadMetric]]):
-        formula = operators.Implies(Left[BadMetric, BadMetric](), Right[BadMetric, BadMetric]())  # pyright: ignore[reportArgumentType, reportUnknownVariableType]
+        formula = operators.Implies(  # pyrefly: ignore[bad-specialization]
+            Left[BadMetric, BadMetric](), Right[BadMetric, BadMetric]()
+        )
 
         with pytest.raises(operators.MetricAttributeError):
-            _ = formula.evaluate(bad_trace)  # pyright: ignore[reportUnknownVariableType]
+            _ = formula.evaluate(bad_trace)
 
 
 class TestNext(UnaryTest):
@@ -271,10 +279,10 @@ class TestGlobally(UnaryTest):
         assert formula.evaluate(good_trace) == expected
 
     def test_unsupported_metric(self, bad_trace: Trace[BadMetric]):
-        formula = operators.Always(Const[BadMetric]())  # pyright: ignore[reportArgumentType, reportUnknownVariableType]
+        formula = operators.Always(Const[BadMetric]())  # pyrefly: ignore[bad-specialization]
 
         with pytest.raises(operators.MetricAttributeError):
-            _ = formula.evaluate(bad_trace)  # pyright: ignore[reportUnknownVariableType]
+            _ = formula.evaluate(bad_trace)
 
 
 class TestFinally(UnaryTest):
@@ -316,7 +324,32 @@ class TestFinally(UnaryTest):
         assert formula.evaluate(good_trace) == expected
 
     def test_unsupported_metric(self, bad_trace: Trace[BadMetric]):
-        formula = operators.Eventually(Const[BadMetric]())  # pyright: ignore[reportArgumentType, reportUnknownVariableType]
+        formula = operators.Eventually(Const[BadMetric]())  # pyrefly: ignore[bad-specialization]
 
         with pytest.raises(operators.MetricAttributeError):
-            _ = formula.evaluate(bad_trace)  # pyright: ignore[reportUnknownVariableType]
+            _ = formula.evaluate(bad_trace)
+
+
+@formula
+def neg(input: Trace[float]) -> Trace[float]:
+    assert isinstance(input, Trace)  # Ensure the input trace is correctly wrapped
+    return Trace.from_timed_states(input.times(), (-state for state in input.states()))
+
+
+class TestCustomOperator(UnaryTest):
+    @pytest.fixture
+    def expected(self, input: Trace[float]) -> Trace[float]:
+        return Trace({time: -state for time, state in input})
+
+    def test_evaluate(self, input: Trace[float], expected: Trace[float]):
+        result = neg.evaluate(input)
+
+        assert isinstance(result, Trace)
+        assert result == expected
+
+    def test_nesting(self, input: Trace[float], expected: Trace[float]):
+        formula = operators.And(neg, Const())
+        result = formula.evaluate(input)
+
+        assert isinstance(result, Trace)
+        assert result == expected

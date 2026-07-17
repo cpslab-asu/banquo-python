@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-from typing import Protocol, TypeVar
+from collections.abc import Callable
+from typing import Protocol
 
-from typing_extensions import Self, override
+from typing_extensions import Self, TypeVar, override
 
 from ._banquo_impl import Trace as _Trace
 from .trace import Trace
 
-S = TypeVar("S", contravariant=True)
-M = TypeVar("M", covariant=True)
+S = TypeVar("S", infer_variance=True)
+M = TypeVar("M", infer_variance=True)
 
 
 class Formula(Protocol[S, M]):
@@ -43,15 +44,15 @@ class SupportsNeg(Protocol):
     def __neg__(self) -> Self: ...
 
 
-class SupportsLE(Protocol):
-    def __le__(self, value: Self, /) -> bool: ...
+class SupportsLT(Protocol):
+    def __lt__(self, value: Self, /) -> bool: ...
 
 
-class SupportsGE(Protocol):
-    def __ge__(self, value: Self, /) -> bool: ...
+class SupportsGT(Protocol):
+    def __gt__(self, value: Self, /) -> bool: ...
 
 
-class SupportsNegGE(SupportsNeg, SupportsGE, Protocol): ...
+class SupportsNegGE(SupportsNeg, SupportsGT, Protocol): ...
 
 
 class EnsureInput(Formula[S, M]):
@@ -100,3 +101,18 @@ def evaluate(formula: Formula[S, M], trace: Trace[S]) -> M:
         return next(iter(result.states()))
     except StopIteration:
         raise ValueError("Provided formula evaluated to an empty trace.")
+
+
+class UserFormula(Formula[S, M]):
+    def __init__(self, func: Callable[[Trace[S]], Trace[M]]):
+        self.func: Callable[[Trace[S]], Trace[M]] = func
+
+    @override
+    def evaluate(self, trace: Trace[S]) -> Trace[M]:
+        return self.func(trace)
+
+
+def formula(f: Callable[[Trace[S]], Trace[M]]) -> Formula[S, M]:
+    """Transform a function into a Formula implementation."""
+
+    return UserFormula(f)

@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Iterator, Mapping
-from typing import TypeVar
 
-from typing_extensions import override
+from typing_extensions import TypeVar, override
 
 from ._banquo_impl import Trace as _Trace
 
-T = TypeVar("T", covariant=True)
-U = TypeVar("U", covariant=True)
+T = TypeVar("T", infer_variance=True)
+U = TypeVar("U", infer_variance=True)
 
 
 def _iter_eq(lhs: Iterable[object], rhs: Iterable[object]) -> bool:
@@ -35,6 +34,10 @@ class Trace(_Trace[T], Iterable[tuple[float, T]]):
     @override
     def __str__(self) -> str:
         return str({time: state for time, state in self})
+
+    @override
+    def __repr__(self) -> str:
+        return str(self)
 
     @override
     def __iter__(self) -> Iterator[tuple[float, T]]:
