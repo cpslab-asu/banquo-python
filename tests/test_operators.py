@@ -91,10 +91,11 @@ class TestNegation(UnaryTest):
         assert formula.evaluate(good_trace) == expected
 
     def test_unsupported_metric(self, bad_trace: Trace[BadMetric]):
-        formula = operators.Not(Const[BadMetric]())  # pyright: ignore[reportArgumentType, reportUnknownVariableType]
+        formula = operators.Not(Const[BadMetric]())   # pyrefly: ignore[bad-specialization]
+
 
         with pytest.raises(operators.MetricAttributeError):
-            _ = formula.evaluate(bad_trace)  # pyright: ignore[reportUnknownVariableType]
+            _ = formula.evaluate(bad_trace)
 
 
 L = TypeVar("L")
@@ -153,10 +154,10 @@ class TestConjunction(BinaryTest):
         assert formula.evaluate(good_trace) == expected
 
     def test_unsupported_metric(self, bad_trace: Trace[tuple[BadMetric, BadMetric]]):
-        formula = operators.And(Left[BadMetric, BadMetric](), Right[BadMetric, BadMetric]())  # pyright: ignore[reportArgumentType, reportUnknownVariableType]
+        formula = operators.And(Left[BadMetric, BadMetric](), Right[BadMetric, BadMetric]())  # pyrefly: ignore[bad-specialization]
 
         with pytest.raises(operators.MetricAttributeError):
-            _ = formula.evaluate(bad_trace)  # pyright: ignore[reportUnknownVariableType]
+            _ = formula.evaluate(bad_trace)
 
 
 class TestDisjunction(BinaryTest):
@@ -178,10 +179,10 @@ class TestDisjunction(BinaryTest):
         assert formula.evaluate(good_trace) == expected
 
     def test_unsupported_metric(self, bad_trace: Trace[tuple[BadMetric, BadMetric]]):
-        formula = operators.Or(Left[BadMetric, BadMetric](), Right[BadMetric, BadMetric]())  # pyright: ignore[reportArgumentType, reportUnknownVariableType]
+        formula = operators.Or(Left[BadMetric, BadMetric](), Right[BadMetric, BadMetric]())  # pyrefly: ignore[bad-specialization]
 
         with pytest.raises(operators.MetricAttributeError):
-            _ = formula.evaluate(bad_trace)  # pyright: ignore[reportUnknownVariableType]
+            _ = formula.evaluate(bad_trace)
 
 
 class TestImplication(BinaryTest):
@@ -204,10 +205,10 @@ class TestImplication(BinaryTest):
         assert result == expected
 
     def test_unsupported_metric(self, bad_trace: Trace[tuple[BadMetric, BadMetric]]):
-        formula = operators.Implies(Left[BadMetric, BadMetric](), Right[BadMetric, BadMetric]())  # pyright: ignore[reportArgumentType, reportUnknownVariableType]
+        formula = operators.Implies(Left[BadMetric, BadMetric](), Right[BadMetric, BadMetric]())  # pyrefly: ignore[bad-specialization]
 
         with pytest.raises(operators.MetricAttributeError):
-            _ = formula.evaluate(bad_trace)  # pyright: ignore[reportUnknownVariableType]
+            _ = formula.evaluate(bad_trace)
 
 
 class TestNext(UnaryTest):
@@ -273,10 +274,10 @@ class TestGlobally(UnaryTest):
         assert formula.evaluate(good_trace) == expected
 
     def test_unsupported_metric(self, bad_trace: Trace[BadMetric]):
-        formula = operators.Always(Const[BadMetric]())  # pyright: ignore[reportArgumentType, reportUnknownVariableType]
+        formula = operators.Always(Const[BadMetric]())  # pyrefly: ignore[bad-specialization]
 
         with pytest.raises(operators.MetricAttributeError):
-            _ = formula.evaluate(bad_trace)  # pyright: ignore[reportUnknownVariableType]
+            _ = formula.evaluate(bad_trace)
 
 
 class TestFinally(UnaryTest):
@@ -318,10 +319,10 @@ class TestFinally(UnaryTest):
         assert formula.evaluate(good_trace) == expected
 
     def test_unsupported_metric(self, bad_trace: Trace[BadMetric]):
-        formula = operators.Eventually(Const[BadMetric]())  # pyright: ignore[reportArgumentType, reportUnknownVariableType]
+        formula = operators.Eventually(Const[BadMetric]())  # pyrefly: ignore[bad-specialization]
 
         with pytest.raises(operators.MetricAttributeError):
-            _ = formula.evaluate(bad_trace)  # pyright: ignore[reportUnknownVariableType]
+            _ = formula.evaluate(bad_trace)
 
 
 @formula
