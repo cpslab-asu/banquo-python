@@ -22,12 +22,12 @@ from .trace import Trace
 
 Bounds: TypeAlias = tuple[float, float]
 
-S = typing.TypeVar("S")
-M = typing.TypeVar("M", covariant=True)
-M_neg = typing.TypeVar("M_neg", bound=SupportsNeg, covariant=True)
-M_le = typing.TypeVar("M_le", bound=SupportsLT, covariant=True)
-M_ge = typing.TypeVar("M_ge", bound=SupportsGT, covariant=True)
-M_neg_ge = typing.TypeVar("M_neg_ge", bound=SupportsNegGE, covariant=True)
+S = TypeVar("S", infer_variance=True)
+M = TypeVar("M", infer_variance=True)
+M_neg = TypeVar("M_neg", bound=SupportsNeg, infer_variance=True)
+M_le = TypeVar("M_le", bound=SupportsLT, infer_variance=True)
+M_ge = TypeVar("M_ge", bound=SupportsGT, infer_variance=True)
+M_neg_ge = TypeVar("M_neg_ge", bound=SupportsNegGE, infer_variance=True)
 
 
 class OperatorMixin:
@@ -132,8 +132,8 @@ class Next(Operator[S, M]):
         super().__init__(_Next(_inner_or_wrap(subformula)), "")
 
 
-S_ = typing.TypeVar("S_")
-M_le_ = typing.TypeVar("M_le_", bound=SupportsLT, covariant=True)
+S_ = TypeVar("S_", infer_variance=True)
+M_le_ = TypeVar("M_le_", bound=SupportsLT, infer_variance=True)
 
 
 class Always(Operator[S, M_le]):
@@ -173,7 +173,7 @@ class Always(Operator[S, M_le]):
         return Always(_Always(bounds, _inner_or_wrap(subformula)))
 
 
-M_ge_ = typing.TypeVar("M_ge_", bound=SupportsGT, covariant=True)
+M_ge_ = TypeVar("M_ge_", bound=SupportsGT, infer_variance=True)
 
 
 class Eventually(Operator[S, M_ge]):

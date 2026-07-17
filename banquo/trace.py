@@ -6,8 +6,8 @@ from typing_extensions import TypeVar, override
 
 from ._banquo_impl import Trace as _Trace
 
-T = TypeVar("T", covariant=True)
-U = TypeVar("U", covariant=True)
+T = TypeVar("T", infer_variance=True)
+U = TypeVar("U", infer_variance=True)
 
 
 def _iter_eq(lhs: Iterable[object], rhs: Iterable[object]) -> bool:

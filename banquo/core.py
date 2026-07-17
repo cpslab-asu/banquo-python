@@ -8,8 +8,8 @@ from typing_extensions import Self, TypeVar, override
 from ._banquo_impl import Trace as _Trace
 from .trace import Trace
 
-S = TypeVar("S", contravariant=True)
-M = TypeVar("M", covariant=True)
+S = TypeVar("S", infer_variance=True)
+M = TypeVar("M", infer_variance=True)
 
 
 class Formula(Protocol[S, M]):
