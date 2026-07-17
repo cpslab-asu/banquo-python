@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "pybanquo"
-version = "0.1.0"
+version = "0.1.1"
 description = "Python bindings for Banquo offline temporal logic monitor"
 readme = "README.md"
 license = {file = "LICENSE"}
