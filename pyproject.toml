@@ -34,7 +34,7 @@ ci = [
 ]
 dev = [
     "maturin>=1.9.4",
-    "ruff>=0.14.0",
+    "ruff>=0.15.0",
     { include-group = "test" },
     { include-group = "types" },
 ]
