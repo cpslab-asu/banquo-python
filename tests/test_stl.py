@@ -4,6 +4,7 @@ from banquo import Predicate, stl
 from banquo import Trace as _Trace
 from banquo import operators as ops
 
+
 def test_parse() -> None:
     formula = stl.parse("always x <= 10.0")
     assert isinstance(formula, stl.Formula)

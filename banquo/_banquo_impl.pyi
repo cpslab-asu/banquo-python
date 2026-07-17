@@ -77,8 +77,7 @@ class Eventually(Formula[S, M_ge]):
     def evaluate(self, trace: Trace[S]) -> Trace[M_ge]: ...
 
 class _StlModule(ModuleType):
-    class Formula(Formula[dict[str, float], float]):
-        ...
+    class Formula(Formula[dict[str, float], float]): ...
 
     parse: Callable[[str], _StlModule.Formula]
 

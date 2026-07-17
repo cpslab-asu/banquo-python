@@ -91,8 +91,7 @@ class TestNegation(UnaryTest):
         assert formula.evaluate(good_trace) == expected
 
     def test_unsupported_metric(self, bad_trace: Trace[BadMetric]):
-        formula = operators.Not(Const[BadMetric]())   # pyrefly: ignore[bad-specialization]
-
+        formula = operators.Not(Const[BadMetric]())  # pyrefly: ignore[bad-specialization]
 
         with pytest.raises(operators.MetricAttributeError):
             _ = formula.evaluate(bad_trace)
@@ -154,7 +153,9 @@ class TestConjunction(BinaryTest):
         assert formula.evaluate(good_trace) == expected
 
     def test_unsupported_metric(self, bad_trace: Trace[tuple[BadMetric, BadMetric]]):
-        formula = operators.And(Left[BadMetric, BadMetric](), Right[BadMetric, BadMetric]())  # pyrefly: ignore[bad-specialization]
+        formula = operators.And(  # pyrefly: ignore[bad-specialization]
+            Left[BadMetric, BadMetric](), Right[BadMetric, BadMetric]()
+        )
 
         with pytest.raises(operators.MetricAttributeError):
             _ = formula.evaluate(bad_trace)
@@ -179,7 +180,9 @@ class TestDisjunction(BinaryTest):
         assert formula.evaluate(good_trace) == expected
 
     def test_unsupported_metric(self, bad_trace: Trace[tuple[BadMetric, BadMetric]]):
-        formula = operators.Or(Left[BadMetric, BadMetric](), Right[BadMetric, BadMetric]())  # pyrefly: ignore[bad-specialization]
+        formula = operators.Or(  # pyrefly: ignore[bad-specialization]
+            Left[BadMetric, BadMetric](), Right[BadMetric, BadMetric]()
+        )
 
         with pytest.raises(operators.MetricAttributeError):
             _ = formula.evaluate(bad_trace)
@@ -205,7 +208,9 @@ class TestImplication(BinaryTest):
         assert result == expected
 
     def test_unsupported_metric(self, bad_trace: Trace[tuple[BadMetric, BadMetric]]):
-        formula = operators.Implies(Left[BadMetric, BadMetric](), Right[BadMetric, BadMetric]())  # pyrefly: ignore[bad-specialization]
+        formula = operators.Implies(  # pyrefly: ignore[bad-specialization]
+            Left[BadMetric, BadMetric](), Right[BadMetric, BadMetric]()
+        )
 
         with pytest.raises(operators.MetricAttributeError):
             _ = formula.evaluate(bad_trace)
