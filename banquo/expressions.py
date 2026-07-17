@@ -3,8 +3,8 @@ from __future__ import annotations
 from collections.abc import Mapping
 
 from ._banquo_impl import Predicate as _Predicate
-from .operators import OperatorMixin
 from .core import EnsureOutput
+from .operators import OperatorMixin
 
 
 class Predicate(EnsureOutput[dict[str, float], float], OperatorMixin):

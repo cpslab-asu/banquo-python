@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Protocol, TypeVar
+from typing import Protocol
 
-from typing_extensions import Self, override
+from typing_extensions import Self, TypeVar, override
 
 from ._banquo_impl import Trace as _Trace
 from .trace import Trace

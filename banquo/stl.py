@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from .core import EnsureOutput
 from ._banquo_impl import stl as _stl
+from .core import EnsureOutput
 
 
 class Formula(EnsureOutput[dict[str, float], float]):

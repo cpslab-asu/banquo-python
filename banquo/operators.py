@@ -1,23 +1,21 @@
 from __future__ import annotations
 
-import typing
+from typing_extensions import TypeAlias, TypeVar, override
 
-from typing_extensions import TypeAlias, override
-
-from ._banquo_impl import And as _And
 from ._banquo_impl import Always as _Always
+from ._banquo_impl import And as _And
 from ._banquo_impl import Eventually as _Eventually
 from ._banquo_impl import Implies as _Implies
 from ._banquo_impl import Next as _Next
 from ._banquo_impl import Not as _Not
 from ._banquo_impl import Or as _Or
 from .core import (
-    Formula,
     EnsureInput,
-    SupportsNeg,
-    SupportsLT,
-    SupportsGT,
     EnsureOutput,
+    Formula,
+    SupportsGT,
+    SupportsLT,
+    SupportsNeg,
     SupportsNegGE,
 )
 from .trace import Trace

@@ -6,7 +6,7 @@ from typing import TypeVar
 import pytest
 import typing_extensions
 
-from banquo import Bottom, Trace, operators, formula
+from banquo import Bottom, Trace, formula, operators
 from banquo.core import Formula
 
 pytestmark = pytest.mark.unit

@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Iterator, Mapping
-from typing import TypeVar
 
-from typing_extensions import override
+from typing_extensions import TypeVar, override
 
 from ._banquo_impl import Trace as _Trace
 
