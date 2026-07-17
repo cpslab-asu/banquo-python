@@ -29,7 +29,6 @@ these terms is a temporal logic formula, which can be used to evaluate a
 each state. This is an example of this process:
 
 ```python
-
 import banquo as bq
 import banquo.operators as ops
 
