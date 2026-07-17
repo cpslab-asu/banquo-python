@@ -37,6 +37,10 @@ class Trace(_Trace[T], Iterable[tuple[float, T]]):
         return str({time: state for time, state in self})
 
     @override
+    def __repr__(self) -> str:
+        return str(self)
+
+    @override
     def __iter__(self) -> Iterator[tuple[float, T]]:
         return zip(super().times(), super().states())
 
